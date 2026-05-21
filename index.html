@@ -1,0 +1,1460 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>School/Grade Performance Visualizer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@300;400;500;600;700;800&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./visualizer.css">
+</head>
+
+<body data-theme="blue">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="brand-name">AIMS Visualizer</span>
+      <button type="button" class="brand-version" id="brand-version" title="View commit history">v1.2.1</button>
+    </div>
+    <div class="brand-updated">Last updated: <span id="last-updated">Apr 14, 2026</span></div>
+
+    <nav class="nav">
+      <div class="nav-group">
+        <div class="nav-h">HOW TO USE</div>
+        <button class="nav-btn" data-page="docs">
+          <span class="nav-btn-label">📖 Docs</span>
+          <span class="nav-pill nav-pill--new" data-pill-for="docs">NEW</span>
+        </button>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-h">EXPLORE</div>
+        <button class="nav-btn" data-page="overview"><span class="nav-btn-label">🏠 Overview</span></button>
+
+        <button class="nav-sub" id="drilldown-toggle" aria-expanded="true" aria-controls="drilldown-items">
+          <span class="nav-sub-caret" aria-hidden="true">▾</span>
+          <span class="nav-sub-label">DRILL DOWN</span>
+        </button>
+        <div class="nav-sub-items" id="drilldown-items">
+          <button class="nav-btn nav-btn--nested" data-page="by-grade"><span class="nav-btn-label">🎓 By Grade</span></button>
+          <button class="nav-btn nav-btn--nested" data-page="by-school"><span class="nav-btn-label">🏫 By School</span></button>
+          <button class="nav-btn nav-btn--nested" data-page="table"><span class="nav-btn-label">📋 Raw Table</span></button>
+        </div>
+
+        <button class="nav-btn" data-page="dashboard">
+          <span class="nav-btn-label">📊 Dashboard</span>
+          <span class="nav-pill nav-pill--new" data-pill-for="dashboard">NEW</span>
+        </button>
+
+        <button class="nav-btn" data-page="ask">
+          <span class="nav-btn-label">💬 Ask the Data</span>
+          <span class="nav-pill nav-pill--new nav-pill--pulse" data-pill-for="ask">NEW</span>
+        </button>
+
+        <button class="nav-btn" data-page="oracle">
+          <span class="nav-btn-label">🔮 The Oracle</span>
+          <span class="nav-pill nav-pill--new nav-pill--pulse" data-pill-for="oracle">NEW</span>
+        </button>
+
+        <button class="nav-btn" data-page="teacher-stats">
+          <span class="nav-btn-label">🎮 Teacher Stats</span>
+          <span class="nav-pill nav-pill--new nav-pill--pulse" data-pill-for="teacher-stats">NEW</span>
+        </button>
+      </div>
+    </nav>
+
+    <div class="sidebar-copyright">Copyright <span id="current-year"></span> · Neithan Casano</div>
+
+  </aside>
+
+
+  <main class="main">
+    <header class="topbar">
+      <div class="panel-tabs" role="tablist" aria-label="Right panel tabs">
+        <button class="panel-tab-btn active" id="tab-overview" data-main-tab="overview" role="tab" aria-selected="true">
+          Overview
+        </button>
+        <button class="panel-tab-btn" id="tab-dashboard" data-main-tab="dashboard" role="tab" aria-selected="false">
+          Dashboard
+        </button>
+        <button class="panel-tab-btn" id="tab-ask" data-main-tab="ask" role="tab" aria-selected="false">
+          Ask the Data
+        </button>
+        <button class="panel-tab-btn" id="tab-oracle" data-main-tab="oracle" role="tab" aria-selected="false">
+          The Oracle
+        </button>
+        <button class="panel-tab-btn" id="tab-teacher-stats" data-main-tab="teacher-stats" role="tab" aria-selected="false">
+          Teacher Stats
+        </button>
+      </div>
+      <h1 class="title sr-only" id="page-title">Overview</h1>
+    </header>
+
+    <!-- cards -->
+    <section class="cards" id="top-cards">
+			<div class="card">
+				<div class="card-body">
+					<div class="g">Load CSV</div>
+					<input type="file" id="file" accept=".csv" />
+					<div class="quick-load-row">
+						<button type="button" class="btn ghost quick-load-btn" id="btn-load-em2" title="Instantly load the bundled EM2 dataset">⚡ Load EM2</button>
+						<button type="button" class="btn ghost quick-load-btn" id="btn-load-gmw" title="Instantly load the bundled GMW dataset">⚡ Load GMW</button>
+					</div>
+					<div class="muted" id="data-status" style="margin-top:8px;">Auto-loading EM2…</div>
+				</div>
+			</div>
+
+
+      <div class="card">
+        <div class="card-body">
+          <div class="g">Filters</div>
+
+          <div class="filter-grid">
+            <label>School
+              <select id="f-school" multiple size="4"></select>
+            </label>
+            <label>Grade
+              <select id="f-grade" multiple size="4"></select>
+            </label>
+            <label>Assessment Type
+              <select id="f-type" multiple size="4"></select>
+            </label>
+            <label>Performance Band
+              <select id="f-band" multiple size="4"></select>
+            </label>
+          </div>
+					
+					<div id="gmw-filter-strip-wrap" style="display:none;">
+						<div id="gmw-filter-strip"></div>
+					</div>
+
+          <div class="filter-grid" style="margin-top:10px;">
+            <label>Date Completed (from)
+              <input type="date" id="f-from">
+            </label>
+            <label>Date Completed (to)
+              <input type="date" id="f-to">
+            </label>
+          </div>
+
+					<div class="filter-actions">
+						<div class="left">
+							<button class="btn" id="btn-apply">Apply</button>
+              <button class="btn" id="btn-save-dashboard" title="Save current overview charts to Dashboard">Save to Dashboard</button>
+						</div>
+						<div class="right">
+							<button class="btn" id="btn-export">Export summary CSV</button>
+
+							<!-- jn.01272026 - Saved View -->
+							<button class="btn" id="btn-copylink" title="Copy a link that restores these filters">
+								Copy link
+							</button>
+
+							<button class="btn ghost" id="btn-reset">Reset filters</button>
+						</div>
+					</div>
+
+
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <div class="g">KPIs</div>
+          <div class="kpis" id="kpis"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- OVERVIEW -->
+		<section class="section page" id="page-overview">
+		
+		<!-- jn.01272026 - Insight cards (auto-find the story) -->
+		<div class="insights" id="insights"></div>
+		
+		<!-- jn.01272026 - AI summary (local, optional) -->
+		<div class="ai-summary" id="ai-summary" style="display:none;">
+			<div class="ai-head">
+				<div class="ai-title">AI Summary</div>
+				<button class="btn" id="btn-ai-summarize">Generate summary</button>
+			</div>
+			<div class="ai-body" id="ai-summary-text"></div>
+			<div class="ai-note">Live v1.2.1</div>
+		</div>
+
+			<!-- jn.022326.gmw.radar - rubric radar (GMW only) -->
+			<details class="viz-collapse" open id="gmw-radar-wrap" style="display:none;">
+				<summary class="viz-collapse-summary">
+					<span class="viz-collapse-title">🕸️ Rubric Radar (avg 1–3)</span>
+					<span class="muted" id="gmw-radar-note">-</span>
+				</summary>
+				<div class="chart-wrap">
+					<canvas id="chartGMWRadar"></canvas>
+				</div>
+			</details>
+	
+			<div id="em2-charts-wrap">
+				<details class="viz-collapse" open>
+					<summary class="viz-collapse-summary">
+						<span class="viz-collapse-title">📊 Band Distribution (School+Grade)</span>
+						<span class="muted" id="chart-note">-</span>
+					</summary>
+					<div class="chart-wrap">
+						<canvas id="chartBands"></canvas>
+					</div>
+				</details>
+
+				<details class="viz-collapse" open style="margin-top:14px;">
+					<summary class="viz-collapse-summary">
+						<span class="viz-collapse-title">📈 Average Performance (School+Grade)</span>
+					</summary>
+					<div class="chart-wrap">
+						<canvas id="chartAvg"></canvas>
+					</div>
+				</details>
+			</div>
+			
+			<!-- jn.022326.gmw.charts - GMW replacements (only shown for GMW) -->
+			<div id="gmw-charts-wrap" style="display:none;">
+
+				<details class="viz-collapse" open style="margin-top:14px;">
+					<summary class="viz-collapse-summary">
+						<span class="viz-collapse-title">📊 Rubric Breakdown (Emerging / Developing / Achieving)</span>
+						<span class="muted" id="gmw-bars-note">-</span>
+					</summary>
+					<div class="chart-wrap">
+						<canvas id="chartGMWBars"></canvas>
+					</div>
+				</details>
+
+				<details class="viz-collapse" open style="margin-top:14px;">
+					<summary class="viz-collapse-summary">
+						<span class="viz-collapse-title">📈 Average Rubric Score by Dimension</span>
+						<span class="muted" id="gmw-avg-note">-</span>
+					</summary>
+					<div class="chart-wrap">
+						<canvas id="chartGMVAvg"></canvas>
+					</div>
+				</details>
+
+				<details class="viz-collapse" open style="margin-top:14px;">
+					<summary class="viz-collapse-summary">
+						<span class="viz-collapse-title">🗂️ Observations</span>
+						<span class="muted" id="gmw-obs-note">-</span>
+					</summary>
+					<div class="table-wrap">
+						<table class="data-table" id="gmw-obs-table">
+							<thead id="gmw-obs-head"></thead>
+							<tbody id="gmw-obs-body"></tbody>
+						</table>
+					</div>
+				</details>
+
+			</div>
+
+		</section>
+
+
+    <!-- BY GRADE -->
+    <section class="section page" id="page-by-grade" style="display:none;">
+      <div class="table-head">
+        <h2>🎓 By Grade (band %)</h2>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartGrade"></canvas>
+      </div>
+    </section>
+
+    <!-- BY SCHOOL -->
+    <section class="section page" id="page-by-school" style="display:none;">
+      <div class="table-head">
+        <h2>🏫 By School (band %)</h2>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartSchool"></canvas>
+      </div>
+    </section>
+
+    <!-- TABLE -->
+    <section class="section page" id="page-table" style="display:none;">
+      <div class="table-head">
+        <h2>📋 Raw rows (filtered)</h2>
+        <input class="search" id="search" placeholder="Search… (school, assessment, band)">
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" id="raw-table">
+          <thead id="raw-head"></thead>
+          <tbody id="raw-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- THE ORACLE - longitudinal / forecasting view -->
+    <section class="section page oracle-page" id="page-oracle" style="display:none;">
+      <div class="oracle-shell">
+        <header class="oracle-header">
+          <div class="oracle-header-main">
+            <div class="oracle-header-eyebrow">🔮 The Oracle · Longitudinal &amp; Forecast</div>
+            <h2 class="oracle-header-title">See where you've been. Glimpse where you're going.</h2>
+            <p class="oracle-header-sub">Pick a lens and a metric. The Oracle plots every entity over time and forecasts the next 1–3 months using a linear trend fit.</p>
+          </div>
+          <div class="oracle-orb" aria-hidden="true"></div>
+        </header>
+
+        <div class="oracle-controls">
+          <label class="oracle-ctrl">
+            <span class="oracle-ctrl-label">Lens (Group by)</span>
+            <select id="oracle-groupby"></select>
+          </label>
+          <label class="oracle-ctrl">
+            <span class="oracle-ctrl-label">Metric</span>
+            <select id="oracle-metric"></select>
+          </label>
+          <label class="oracle-ctrl">
+            <span class="oracle-ctrl-label">Time bucket</span>
+            <select id="oracle-bucket">
+              <option value="auto">Auto</option>
+              <option value="week">Week</option>
+              <option value="month" selected>Month</option>
+              <option value="quarter">Quarter</option>
+            </select>
+          </label>
+          <label class="oracle-ctrl">
+            <span class="oracle-ctrl-label">Forecast (months)</span>
+            <select id="oracle-forecast">
+              <option value="0">None</option>
+              <option value="1">+1 month</option>
+              <option value="2" selected>+2 months</option>
+              <option value="3">+3 months</option>
+            </select>
+          </label>
+          <label class="oracle-ctrl">
+            <span class="oracle-ctrl-label">Top N entities</span>
+            <select id="oracle-topn">
+              <option value="3">3</option>
+              <option value="5" selected>5</option>
+              <option value="8">8</option>
+              <option value="12">12</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="oracle-prediction-note" id="oracle-note">Loading…</div>
+
+        <details class="viz-collapse oracle-chart-collapse" open>
+          <summary class="viz-collapse-summary">
+            <span class="viz-collapse-title">📈 Trajectory &amp; Forecast</span>
+            <span class="muted" id="oracle-chart-note">-</span>
+          </summary>
+          <div class="chart-wrap oracle-chart-wrap">
+            <canvas id="chartOracle"></canvas>
+          </div>
+        </details>
+
+        <div class="oracle-insights" id="oracle-insights"></div>
+
+        <div class="oracle-disclaimer">
+          <b>How the forecast works.</b> Each entity's history is fit with a simple linear regression and extended forward by the chosen horizon. This is a trend projection, not a machine-learning model - it is most trustworthy for entities with ≥4 data points and stable cadence. Big program changes, holidays, and data-collection gaps will bend reality away from the dotted line.
+        </div>
+      </div>
+    </section>
+
+    <!-- TEACHER STATS -->
+    <section class="section page ts-page" id="page-teacher-stats" style="display:none;">
+      <div class="ts-shell">
+
+        <header class="ts-header">
+          <div class="ts-header-main">
+            <div class="ts-header-eyebrow">Coach Cockpit &middot; Teacher Stats</div>
+            <h2 class="ts-header-title">Teacher Performance Profiles</h2>
+            <p class="ts-header-sub">Select a teacher to view their rubric stats, observation history, and coaching notes.</p>
+          </div>
+          <div class="ts-trophy" aria-hidden="true"></div>
+        </header>
+
+        <div class="ts-search-bar">
+          <div class="ts-chips-wrap" id="ts-chips-wrap">
+            <input type="text" class="ts-search-input" id="ts-search-input"
+                   placeholder="Search teachers..." autocomplete="off">
+          </div>
+          <div class="ts-dropdown" id="ts-dropdown"></div>
+        </div>
+
+        <div class="ts-grid" id="ts-grid"></div>
+
+        <div class="ts-detail" id="ts-detail" style="display:none;">
+          <div class="ts-detail-header" id="ts-detail-header"></div>
+          <div class="ts-detail-body">
+            <div class="ts-stats-panel">
+              <div class="ts-radar-wrap">
+                <canvas id="ts-radar-chart"></canvas>
+              </div>
+              <div class="ts-stat-bars" id="ts-stat-bars"></div>
+            </div>
+            <div class="ts-power-level" id="ts-power-level"></div>
+          </div>
+          <div class="ts-comments" id="ts-comments"></div>
+        </div>
+
+        <div class="ts-compare" id="ts-compare" style="display:none;">
+          <div class="ts-compare-header">
+            <h3 class="ts-compare-title">Averaged Comparison</h3>
+            <div class="ts-compare-sub" id="ts-compare-sub"></div>
+          </div>
+          <div class="ts-compare-body">
+            <div class="ts-compare-radar-wrap">
+              <canvas id="ts-compare-radar"></canvas>
+            </div>
+            <div class="ts-compare-bars" id="ts-compare-bars"></div>
+          </div>
+          <div class="ts-compare-power" id="ts-compare-power"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ASK THE DATA -->
+    <section class="section page ask-page" id="page-ask" style="display:none;">
+      <div class="ask-shell">
+        <header class="ask-header">
+          <div class="ask-header-main">
+            <div class="ask-header-eyebrow">Coach Cockpit · Ask the Data</div>
+            <h2 class="ask-header-title">💬 Have a real conversation with your dataset</h2>
+          </div>
+          <div class="ask-context-chip" id="ask-context-chip" aria-live="polite">
+            <span class="ask-context-dot"></span>
+            <span id="ask-context-text">No data loaded yet - upload a CSV to start.</span>
+          </div>
+        </header>
+
+        <div class="ask-transcript" id="ask-transcript" role="log" aria-live="polite">
+          <div class="ask-empty" id="ask-empty">
+            <div class="ask-empty-title">Ask like you'd talk to a coach.</div>
+            <div class="ask-empty-sub">Your question gets answered using the rows and filters currently loaded.</div>
+          </div>
+        </div>
+
+        <div class="ask-chips" id="ask-chips" role="list" aria-label="Suggested questions">
+          <button class="ask-chip" data-prompt="Which dimension is the weakest across my schools right now, and what would you tell a new coach about it?">Weakest dimension & coaching angle</button>
+          <button class="ask-chip" data-prompt="Who should I prioritize observing next week based on the current data, and why?">Who to observe next</button>
+          <button class="ask-chip" data-prompt="Compare this period to the prior period - what changed the most, and is it a signal or noise?">What changed vs. prior period</button>
+          <button class="ask-chip" data-prompt="If I could only send one professional-development email to these teachers this week, what should it say?">One PD email to send</button>
+        </div>
+
+        <form class="ask-composer" id="ask-composer" autocomplete="off">
+          <textarea class="ask-input" id="ask-input" rows="2" placeholder="Ask a coaching question about the currently filtered data…"></textarea>
+          <div class="ask-composer-actions">
+            <button type="button" class="btn ghost" id="ask-clear" title="Clear this conversation">Clear</button>
+            <button type="submit" class="btn" id="ask-send">Ask</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- DOCS -->
+    <section class="page docs-page" id="page-docs" style="display:none;">
+      <div class="docs-hero">
+        <div class="docs-hero-eyebrow">Documentation</div>
+        <h2 class="docs-hero-title">How AIMS Visualizer works</h2>
+        <p class="docs-hero-sub">A premium tour of every feature - load, filter, analyze, save, share, and compare with AI.</p>
+        <div class="docs-hero-orbs" aria-hidden="true">
+          <span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>
+        </div>
+      </div>
+
+      <div class="docs-tabs" role="tablist">
+        <button class="docs-tab active" data-docs-tab="features" role="tab" aria-selected="true">Features</button>
+        <button class="docs-tab" data-docs-tab="history" role="tab" aria-selected="false">History</button>
+      </div>
+
+      <div class="docs-tab-panel" data-docs-panel="features">
+
+      <div class="docs-section">
+        <div class="docs-section-head">
+          <div class="docs-section-kicker">01 · Overview Tab</div>
+          <h3 class="docs-section-title">The analysis workspace</h3>
+          <p class="docs-section-sub">Load your dataset, apply filters, and reveal insights in seconds.</p>
+        </div>
+
+        <div class="docs-grid">
+          <!-- 1. Load CSV -->
+          <article class="docs-card">
+            <div class="docs-card-num">01</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Load CSV</h4>
+              <p class="docs-card-desc">Drop in an <b>EM2</b> (student performance) or <b>GMW</b> (classroom observation) CSV. The visualizer auto-detects the format and reshapes the data accordingly.</p>
+              <ul class="docs-bullets">
+                <li>Format detection is automatic - no configuration needed.</li>
+                <li>GMW wide-format sheets are reshaped row-by-row into analyzable long format.</li>
+                <li>Qualtrics header/meta rows are stripped automatically.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-csv">
+                <div class="diag-csv-file">
+                  <div class="diag-csv-corner"></div>
+                  <div class="diag-csv-line l1"></div>
+                  <div class="diag-csv-line l2"></div>
+                  <div class="diag-csv-line l3"></div>
+                  <div class="diag-csv-line l4"></div>
+                </div>
+                <div class="diag-csv-badges">
+                  <span class="diag-badge b-em2">EM2</span>
+                  <span class="diag-badge b-gmw">GMW</span>
+                </div>
+                <div class="diag-csv-arrow">→</div>
+                <div class="diag-csv-target">
+                  <div class="diag-csv-target-bar b1"></div>
+                  <div class="diag-csv-target-bar b2"></div>
+                  <div class="diag-csv-target-bar b3"></div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 2. Filters -->
+          <article class="docs-card">
+            <div class="docs-card-num">02</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">The Filters</h4>
+              <p class="docs-card-desc">Scope the view to exactly what matters: <b>School, Grade, Assessment Type, Performance Band,</b> and a <b>date range</b>. For GMW, Type becomes <i>Curriculum</i> and Band becomes <i>Module</i>, plus a horizontal strip of observer/district/state/teacher filters.</p>
+              <ul class="docs-bullets">
+                <li>Four primary multi-selects + date range.</li>
+                <li>GMW adds 7 contextual filters (observer, role, district, etc.).</li>
+                <li>Every filter updates insight cards and charts together.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-filters">
+                <span class="diag-chip c1">School</span>
+                <span class="diag-chip c2">Grade</span>
+                <span class="diag-chip c3">Type</span>
+                <span class="diag-chip c4">Band</span>
+                <span class="diag-chip c5 date">📅 Date</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- 3. Apply Filters -->
+          <article class="docs-card">
+            <div class="docs-card-num">03</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Apply Filters</h4>
+              <p class="docs-card-desc">Click the copper <b>Apply</b> button to recompute KPIs, insight cards and charts. Use <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + click to select multiple values in a single list. <b>Reset filters</b> clears everything instantly.</p>
+              <ul class="docs-bullets">
+                <li><kbd>Ctrl</kbd> / <kbd>⌘</kbd> + click = multi-select.</li>
+                <li><kbd>Shift</kbd> + click = select a range.</li>
+                <li>Apply triggers a full rerender - safe to spam.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-funnel" aria-hidden="true">
+                <div class="funnel-dots">
+                  <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                </div>
+                <svg viewBox="0 0 120 90" class="funnel-svg">
+                  <path d="M10 10 H110 L75 50 V80 H45 V50 Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                </svg>
+                <div class="funnel-out"></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 4. Save to Dashboard -->
+          <article class="docs-card">
+            <div class="docs-card-num">04</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Save to Dashboard</h4>
+              <p class="docs-card-desc">Snapshot the current charts into the <b>Dashboard</b> panel. Give it a name (e.g. <i>"Spring Benchmark - Grade 4 Focus"</i>) and it's stored locally so you can revisit or compare later.</p>
+              <ul class="docs-bullets">
+                <li>Captures all visible charts in one bundle.</li>
+                <li>Stored in your browser - private, instant.</li>
+                <li>Open the Dashboard tab to review any snapshot.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-stack">
+                <div class="stack-card s1"></div>
+                <div class="stack-card s2"></div>
+                <div class="stack-card s3 flying"></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 5. Export CSV -->
+          <article class="docs-card">
+            <div class="docs-card-num">05</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Export Summary CSV</h4>
+              <p class="docs-card-desc">Download a tidy CSV of the current <b>school × grade</b> summary - averages, weighted points, and band percentages - ready for Excel, Sheets, or further analysis.</p>
+              <ul class="docs-bullets">
+                <li>Respects all active filters.</li>
+                <li>Columns include <code>avg_overall_percentage</code>, <code>points_pct</code>, and per-band percentages.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-export">
+                <div class="diag-doc">
+                  <span>CSV</span>
+                </div>
+                <div class="diag-arrow-down">↓</div>
+                <div class="diag-tray"></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 6. Quickshare -->
+          <article class="docs-card">
+            <div class="docs-card-num">06</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Quickshare &amp; QS Link</h4>
+              <p class="docs-card-desc">Copy a short link that encodes your <b>exact view</b> - filters, active tab, date window, and GMW extra filters. Recipients open the link and land on the same scene, with charts recomputed from their CSV copy.</p>
+              <ul class="docs-bullets">
+                <li>Short code backed by Firestore (e.g. <code>?qs=A7F2K9Q</code>).</li>
+                <li>Carries the dataset kind so GMW views restore the radar and GMW-specific charts.</li>
+                <li>AI Summary text (if generated) travels with the link.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-share">
+                <div class="share-node n1">A</div>
+                <svg class="share-line" viewBox="0 0 200 60" preserveAspectRatio="none">
+                  <path d="M10 30 C 70 -10, 130 70, 190 30" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="4 4"/>
+                </svg>
+                <div class="share-node n2">B</div>
+                <div class="share-link-pill">⚡ qs=A7F2K9Q</div>
+              </div>
+            </div>
+          </article>
+
+          <!-- 7. AI Summary -->
+          <article class="docs-card">
+            <div class="docs-card-num">07</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">AI Summary</h4>
+              <p class="docs-card-desc">Turn the automatically-detected insight cards (largest drop, most consistent school, top band shift, largest gain, etc.) into a concise narrative suitable for a memo or stakeholder brief.</p>
+              <ul class="docs-bullets">
+                <li>Generated on-demand - click <b>Generate summary</b>.</li>
+                <li>Uses the OpenAI proxy, no local model needed.</li>
+                <li>Locked to the quickshare state so recipients see the same text.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-ai">
+                <div class="ai-spark s1">✦</div>
+                <div class="ai-spark s2">✦</div>
+                <div class="ai-spark s3">✦</div>
+                <div class="ai-lines">
+                  <div class="ai-line"></div>
+                  <div class="ai-line"></div>
+                  <div class="ai-line short"></div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="docs-section">
+        <div class="docs-section-head">
+          <div class="docs-section-kicker">02 · Dashboard Tab</div>
+          <h3 class="docs-section-title">Compare, curate, comment</h3>
+          <p class="docs-section-sub">A second surface for reviewing saved snapshots side by side.</p>
+        </div>
+
+        <div class="docs-grid">
+          <!-- D1 -->
+          <article class="docs-card">
+            <div class="docs-card-num">01</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Saved Charts · left panel</h4>
+              <p class="docs-card-desc">Every chart bundle you save from the Overview tab appears as a card here, sorted by most recent. Names are truncated elegantly; timestamps stay readable.</p>
+              <ul class="docs-bullets">
+                <li>Copper rail indicates a selectable item.</li>
+                <li>Active selection uses a plum rail + tinted background.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-list">
+                <div class="list-item li1"></div>
+                <div class="list-item li2"></div>
+                <div class="list-item li3 active"></div>
+                <div class="list-item li4"></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- D2 -->
+          <article class="docs-card">
+            <div class="docs-card-num">02</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Click on multiple charts</h4>
+              <p class="docs-card-desc">Hold <kbd>Ctrl</kbd>/<kbd>⌘</kbd> and click multiple saved entries to compare them simultaneously. The right panel arranges them in a responsive grid.</p>
+              <ul class="docs-bullets">
+                <li>Click to view one.</li>
+                <li><kbd>Ctrl</kbd>/<kbd>⌘</kbd> + click to add another.</li>
+                <li>Click again to remove from comparison.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-multi">
+                <div class="multi-check c1">✓</div>
+                <div class="multi-check c2">✓</div>
+                <div class="multi-check c3">✓</div>
+              </div>
+            </div>
+          </article>
+
+          <!-- D3 -->
+          <article class="docs-card">
+            <div class="docs-card-num">03</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Right panel Preview</h4>
+              <p class="docs-card-desc">Selected snapshots render as a live preview of their charts - images when captured, canvases when re-rendered - each labeled with its save name and timestamp.</p>
+              <ul class="docs-bullets">
+                <li>Responsive grid adapts to your window size.</li>
+                <li>Cards retain their original color system for comparison fidelity.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-preview">
+                <div class="prev-panel p1"></div>
+                <div class="prev-panel p2"></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- D4 -->
+          <article class="docs-card">
+            <div class="docs-card-num">04</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">AI Summary &amp; Comparison</h4>
+              <p class="docs-card-desc">Generate a single summary for one snapshot or an <b>academic-report-style comparison</b> across multiple snapshots - trends, differences, and notable patterns, in plain language.</p>
+              <ul class="docs-bullets">
+                <li>Single-chart mode: concise insight paragraph.</li>
+                <li>Multi-chart mode: structured comparison report.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-compare">
+                <div class="compare-card cc1"></div>
+                <div class="compare-card cc2"></div>
+                <div class="compare-merge">✦</div>
+                <div class="compare-out">
+                  <div class="ai-line"></div>
+                  <div class="ai-line"></div>
+                  <div class="ai-line short"></div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="docs-section">
+        <div class="docs-section-head">
+          <div class="docs-section-kicker">03 · Ask the Data</div>
+          <h3 class="docs-section-title">Talk to your dataset like a coach</h3>
+          <p class="docs-section-sub">A grounded, coach-flavored conversation surface. Ask in plain English, get back specific, actionable answers pulled directly from the rows currently in scope.</p>
+        </div>
+
+        <div class="docs-grid">
+          <article class="docs-card">
+            <div class="docs-card-num">01</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Grounded by your filters</h4>
+              <p class="docs-card-desc">Every question is answered against a compact <b>data context block</b> built from your current School, Grade, and date selections. Change a filter and the next turn sees the new slice automatically.</p>
+              <ul class="docs-bullets">
+                <li>Context refreshes when you hit Apply.</li>
+                <li>Row count and active filters are visible in the header chip.</li>
+                <li>Memoized between turns so follow-ups stay fast and cheap.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-ask-grounded" aria-hidden="true">
+                <div class="diag-ask-filters">
+                  <span class="diag-ask-chip f1">School</span>
+                  <span class="diag-ask-chip f2">Grade</span>
+                  <span class="diag-ask-chip f3">Date</span>
+                </div>
+                <div class="diag-ask-arrow">↘</div>
+                <div class="diag-ask-bubble">
+                  <div class="diag-ask-line l1"></div>
+                  <div class="diag-ask-line l2"></div>
+                  <div class="diag-ask-line l3"></div>
+                  <div class="diag-ask-sparkle"></div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">02</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Coach-tone by design</h4>
+              <p class="docs-card-desc">The system prompt casts the model as a veteran instructional coach. Answers favor specifics, invite action, and suggest next coaching moves where the question calls for it.</p>
+              <ul class="docs-bullets">
+                <li>No corporate BI voice, no generic hedging.</li>
+                <li>Teacher names are anonymized by default.</li>
+                <li>Ends with concrete next moves when the prompt implies action.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-ask-coach" aria-hidden="true">
+                <div class="diag-ask-avatar">🧑‍🏫</div>
+                <div class="diag-ask-quote">
+                  <div class="diag-ask-quotemark">"</div>
+                  <div class="diag-ask-line l1"></div>
+                  <div class="diag-ask-line l2"></div>
+                  <div class="diag-ask-move m1">Next move</div>
+                  <div class="diag-ask-move m2">Next move</div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">03</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Suggestion chips &amp; session memory</h4>
+              <p class="docs-card-desc">Start with a one-click prompt (weakest dimension, who to observe next, what changed), or free-type. The last several turns stay in context so follow-ups feel continuous.</p>
+              <ul class="docs-bullets">
+                <li>Four coach-flavored chip starters above the composer.</li>
+                <li>Clear button resets the conversation without touching filters.</li>
+                <li>Cmd/Ctrl + Enter to send; plain Enter keeps multi-line formatting.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-ask-chips" aria-hidden="true">
+                <div class="diag-ask-chiprow">
+                  <span class="diag-ask-sugg s1">Weakest dimension</span>
+                  <span class="diag-ask-sugg s2">Who to observe</span>
+                  <span class="diag-ask-sugg s3">What changed</span>
+                </div>
+                <div class="diag-ask-thread">
+                  <span class="diag-ask-turn t1"></span>
+                  <span class="diag-ask-turn t2"></span>
+                  <span class="diag-ask-turn t3"></span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="docs-section">
+        <div class="docs-section-head">
+          <div class="docs-section-kicker">04 · The Oracle</div>
+          <h3 class="docs-section-title">Longitudinal trends and forecasts</h3>
+          <p class="docs-section-sub">A generalized over-time view. Pick a lens, a metric, and a horizon. The Oracle plots every entity over time and projects the next one to three months using a simple linear-trend fit.</p>
+        </div>
+
+        <div class="docs-grid">
+          <article class="docs-card">
+            <div class="docs-card-num">01</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Any lens, any metric</h4>
+              <p class="docs-card-desc">Group by School, Grade, Teacher, Observer, Role, State, District, School Type, Curriculum, Module, or individual Rubric Dimension. Metric options adapt to the dataset (EM2 percentages vs GMW rubric scores).</p>
+              <ul class="docs-bullets">
+                <li>EM2: Average %, % Proficient+, % Not Yet, Row count.</li>
+                <li>GMW: Avg rubric score (1 to 3), % Achieving, % Emerging, Row count.</li>
+                <li>Top N selector prevents chart spaghetti.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-oracle-lens" aria-hidden="true">
+                <div class="diag-oracle-prism">🔮</div>
+                <div class="diag-oracle-rays">
+                  <span class="diag-oracle-ray r1"></span>
+                  <span class="diag-oracle-ray r2"></span>
+                  <span class="diag-oracle-ray r3"></span>
+                  <span class="diag-oracle-ray r4"></span>
+                  <span class="diag-oracle-ray r5"></span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">02</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Forecast, honestly</h4>
+              <p class="docs-card-desc">Each entity's history is fit with a <b>least-squares linear regression</b>. The fit is extended forward as a dashed line in the same color as the history. No hidden ML, no black box: the math is auditable and explained on the page.</p>
+              <ul class="docs-bullets">
+                <li>Horizons: +1, +2, or +3 buckets (or turn forecast off).</li>
+                <li>Time buckets: Week, Month, Quarter, or Auto (picks by data span).</li>
+                <li>Disclaimer card on the page explains when to trust the line.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-oracle-forecast" aria-hidden="true">
+                <svg viewBox="0 0 240 110" preserveAspectRatio="none">
+                  <path class="diag-oracle-past"   d="M10,85 L50,72 L90,60 L130,48 L170,38"/>
+                  <path class="diag-oracle-future" d="M170,38 L210,26 L234,16"/>
+                  <circle class="diag-oracle-pt" cx="10"  cy="85" r="3"/>
+                  <circle class="diag-oracle-pt" cx="50"  cy="72" r="3"/>
+                  <circle class="diag-oracle-pt" cx="90"  cy="60" r="3"/>
+                  <circle class="diag-oracle-pt" cx="130" cy="48" r="3"/>
+                  <circle class="diag-oracle-pt anchor" cx="170" cy="38" r="4"/>
+                  <circle class="diag-oracle-pt future" cx="210" cy="26" r="3"/>
+                  <circle class="diag-oracle-pt future" cx="234" cy="16" r="3"/>
+                </svg>
+                <div class="diag-oracle-legend">
+                  <span><span class="diag-oracle-sw solid"></span>History</span>
+                  <span><span class="diag-oracle-sw dashed"></span>Forecast</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">03</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Insight cards under the chart</h4>
+              <p class="docs-card-desc">After the chart renders, three cards call out the <b>steepest rise</b>, <b>sharpest drop</b>, and <b>most stable</b> entity by fitted slope, so reviewers see the story without having to read the lines themselves.</p>
+              <ul class="docs-bullets">
+                <li>Ranked by regression slope per bucket.</li>
+                <li>Live re-rank whenever filters or controls change.</li>
+                <li>Row counts shown so small-sample entities are visible.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-oracle-insights" aria-hidden="true">
+                <div class="diag-oracle-mini rise">
+                  <div class="diag-oracle-mini-kicker">📈 Rise</div>
+                  <div class="diag-oracle-mini-bar" style="--w:78%"></div>
+                </div>
+                <div class="diag-oracle-mini drop">
+                  <div class="diag-oracle-mini-kicker">📉 Drop</div>
+                  <div class="diag-oracle-mini-bar" style="--w:44%"></div>
+                </div>
+                <div class="diag-oracle-mini stable">
+                  <div class="diag-oracle-mini-kicker">🧘 Stable</div>
+                  <div class="diag-oracle-mini-bar" style="--w:60%"></div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="docs-section">
+        <div class="docs-section-head">
+          <div class="docs-section-kicker">05 · Teacher Stats</div>
+          <h3 class="docs-section-title">Game-style teacher performance profiles</h3>
+          <p class="docs-section-sub">A character-select screen for teachers. Browse rubric stats as RPG-style attributes, compare multiple teachers, and review coaching notes - all powered by GMW observation data.</p>
+        </div>
+
+        <div class="docs-grid">
+          <article class="docs-card">
+            <div class="docs-card-num">01</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Character select grid</h4>
+              <p class="docs-card-desc">Every teacher in the GMW dataset appears as a premium card with their <b>initials avatar</b>, school, grade, observation count, and a <b>Level badge</b> (Lv. 10–30) derived from their overall rubric average.</p>
+              <ul class="docs-bullets">
+                <li>Mini stat bars at the bottom show an at-a-glance fingerprint of all 8 dimensions.</li>
+                <li>Cards lift on hover with a copper glow for the selected state.</li>
+                <li>GMW data auto-loads when you open the page - no upload needed.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-ts-grid" aria-hidden="true">
+                <div class="diag-ts-card dtc1">
+                  <div class="diag-ts-avatar">KH</div>
+                  <div class="diag-ts-bars">
+                    <span class="dtb b1"></span><span class="dtb b2"></span><span class="dtb b3"></span><span class="dtb b4"></span>
+                  </div>
+                  <div class="diag-ts-level">Lv.24</div>
+                </div>
+                <div class="diag-ts-card dtc2">
+                  <div class="diag-ts-avatar">MR</div>
+                  <div class="diag-ts-bars">
+                    <span class="dtb b5"></span><span class="dtb b6"></span><span class="dtb b7"></span><span class="dtb b8"></span>
+                  </div>
+                  <div class="diag-ts-level">Lv.19</div>
+                </div>
+                <div class="diag-ts-card dtc3">
+                  <div class="diag-ts-avatar">JL</div>
+                  <div class="diag-ts-bars">
+                    <span class="dtb b9"></span><span class="dtb b10"></span><span class="dtb b11"></span><span class="dtb b12"></span>
+                  </div>
+                  <div class="diag-ts-level">Lv.27</div>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">02</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">RPG stat sheet &amp; Power Level</h4>
+              <p class="docs-card-desc">Click a teacher to reveal their full stat sheet: a <b>radar chart</b> of all 8 dimensions, <b>HP/MP-style gradient bars</b> with color-coded scores (orange=Emerging, amber=Developing, blue=Achieving), and a pulsing <b>Power Level orb</b> showing their composite score.</p>
+              <ul class="docs-bullets">
+                <li>Bars animate in with a smooth width transition.</li>
+                <li>Power Level orb pulses with a soft plum glow.</li>
+                <li>Radar chart shows the full dimensional profile at a glance.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-ts-stats" aria-hidden="true">
+                <div class="diag-ts-statbars">
+                  <div class="diag-ts-sbar"><div class="diag-ts-sfill sf-achieving" style="--w:88%"></div></div>
+                  <div class="diag-ts-sbar"><div class="diag-ts-sfill sf-developing" style="--w:62%"></div></div>
+                  <div class="diag-ts-sbar"><div class="diag-ts-sfill sf-emerging" style="--w:40%"></div></div>
+                  <div class="diag-ts-sbar"><div class="diag-ts-sfill sf-achieving" style="--w:76%"></div></div>
+                </div>
+                <div class="diag-ts-orb">
+                  <span class="diag-ts-orb-num">2.4</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">03</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Multi-select search &amp; comparison</h4>
+              <p class="docs-card-desc">Search and add teachers as <b>chips</b> in a Facebook Messenger-style input. Select two or more to see an <b>overlaid radar chart</b> comparing their profiles, with a gold dashed line showing the averaged score across selected teachers.</p>
+              <ul class="docs-bullets">
+                <li>Backspace removes the last chip; click ✕ on any chip to remove it.</li>
+                <li>Arrow keys navigate the dropdown; Enter selects.</li>
+                <li>Combined Power Level shows the group average.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-ts-compare" aria-hidden="true">
+                <div class="diag-ts-chips-row">
+                  <span class="diag-ts-chipd c1">Kim H.</span>
+                  <span class="diag-ts-chipd c2">Maria R.</span>
+                  <span class="diag-ts-chipd c3">Joe L.</span>
+                </div>
+                <div class="diag-ts-radar-icon">
+                  <svg viewBox="0 0 80 80" class="diag-ts-radar-svg">
+                    <polygon class="diag-ts-rpoly p1" points="40,10 68,30 58,65 22,65 12,30"/>
+                    <polygon class="diag-ts-rpoly p2" points="40,18 62,34 54,60 26,60 18,34"/>
+                    <polygon class="diag-ts-rpoly pavg" points="40,14 65,32 56,62 24,62 15,32"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">04</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Coaching notes accordion</h4>
+              <p class="docs-card-desc">Every observation comment is organized into <b>8 collapsible sections</b>, one per rubric dimension. Each note shows the observer name, date, and the score given for that observation - so coaches can trace feedback over time.</p>
+              <ul class="docs-bullets">
+                <li>Smooth expand/collapse animation.</li>
+                <li>Note count shown per dimension header.</li>
+                <li>Score pills color-coded: Emerging, Developing, Achieving.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-ts-accordion" aria-hidden="true">
+                <div class="diag-ts-acc-row closed">
+                  <span class="diag-ts-acc-label">D1: Lesson Components</span>
+                  <span class="diag-ts-acc-caret">▸</span>
+                </div>
+                <div class="diag-ts-acc-row open">
+                  <span class="diag-ts-acc-label">D2: Pedagogical Elements</span>
+                  <span class="diag-ts-acc-caret">▾</span>
+                </div>
+                <div class="diag-ts-acc-body">
+                  <div class="diag-ts-acc-note n1"></div>
+                  <div class="diag-ts-acc-note n2"></div>
+                </div>
+                <div class="diag-ts-acc-row closed">
+                  <span class="diag-ts-acc-label">D3: Cognitive Lift</span>
+                  <span class="diag-ts-acc-caret">▸</span>
+                </div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="docs-section">
+        <div class="docs-section-head">
+          <div class="docs-section-kicker">06 · What the Tool Captures</div>
+          <h3 class="docs-section-title">The rubric behind every observation</h3>
+          <p class="docs-section-sub">The Walkthrough Tool captures classroom data across <b>eight dimensions</b> grouped into <b>four categories</b>. Hover any dimension label in the dashboard - radar axes, bar charts, Teacher Stats stat bars, accordion headers, or character-card mini-bars - to see the full definition in context.</p>
+        </div>
+
+        <div class="docs-grid">
+          <article class="docs-card">
+            <div class="docs-card-num">01</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Curriculum Use</h4>
+              <p class="docs-card-desc">A teacher's skills in facilitating Great Minds lesson components and pedagogical elements.</p>
+              <ul class="docs-bullets">
+                <li>Lesson Component Facilitation</li>
+                <li>Pedagogical Elements</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-curr" aria-hidden="true">
+                <div class="diag-curr-segs">
+                  <span class="diag-curr-seg s1"></span>
+                  <span class="diag-curr-seg s2"></span>
+                  <span class="diag-curr-seg s3"></span>
+                  <span class="diag-curr-seg s4"></span>
+                </div>
+                <svg class="diag-curr-arc" viewBox="0 0 120 50">
+                  <path d="M8 38 Q60 -6 112 38" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 4"/>
+                </svg>
+                <span class="diag-curr-dot"></span>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">02</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Student-Centered Instruction</h4>
+              <p class="docs-card-desc">Emphasis on students' cognitive lift and discourse.</p>
+              <ul class="docs-bullets">
+                <li>Cognitive Lift</li>
+                <li>Discourse</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-sci" aria-hidden="true">
+                <div class="diag-sci-figure diag-sci-f1">
+                  <span class="diag-sci-head"></span>
+                  <span class="diag-sci-body"></span>
+                  <span class="diag-sci-bubble b1">?</span>
+                </div>
+                <div class="diag-sci-figure diag-sci-f2">
+                  <span class="diag-sci-head"></span>
+                  <span class="diag-sci-body"></span>
+                  <span class="diag-sci-bubble b2">!</span>
+                </div>
+                <div class="diag-sci-figure diag-sci-f3">
+                  <span class="diag-sci-head"></span>
+                  <span class="diag-sci-body"></span>
+                  <span class="diag-sci-bubble b3">★</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">03</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Gathering and Using Evidence</h4>
+              <p class="docs-card-desc">How teachers use curriculum-embedded formative and summative assessments and lesson activities to provide focused, actionable feedback to students.</p>
+              <ul class="docs-bullets">
+                <li>Collecting Evidence</li>
+                <li>Responding and Feedback</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-evidence" aria-hidden="true">
+                <div class="diag-evidence-clip">
+                  <div class="diag-evidence-row r1"></div>
+                  <div class="diag-evidence-row r2"></div>
+                  <div class="diag-evidence-row r3"></div>
+                  <div class="diag-evidence-row r4"></div>
+                </div>
+                <svg class="diag-evidence-glass" viewBox="0 0 60 60">
+                  <circle cx="22" cy="22" r="14" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                  <line x1="33" y1="33" x2="50" y2="50" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">04</div>
+            <div class="docs-card-body">
+              <h4 class="docs-card-title">Student Engagement</h4>
+              <p class="docs-card-desc">Participation in collaborative and independent lesson activities.</p>
+              <ul class="docs-bullets">
+                <li>Collaborative Engagement</li>
+                <li>Independent Engagement</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-engage" aria-hidden="true">
+                <svg viewBox="0 0 120 80" class="diag-engage-svg">
+                  <line x1="30" y1="40" x2="60" y2="20" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3"/>
+                  <line x1="30" y1="40" x2="60" y2="60" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3"/>
+                  <line x1="60" y1="20" x2="90" y2="40" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3"/>
+                  <line x1="60" y1="60" x2="90" y2="40" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3"/>
+                </svg>
+                <span class="diag-engage-node n1"></span>
+                <span class="diag-engage-node n2"></span>
+                <span class="diag-engage-node n3"></span>
+                <span class="diag-engage-node n4"></span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="docs-section">
+        <div class="docs-section-head">
+          <div class="docs-section-kicker">07 · Dimension Definitions</div>
+          <h3 class="docs-section-title">All eight dimensions, in detail</h3>
+          <p class="docs-section-sub">Full rubric definitions for each dimension. These same descriptions appear as hover tooltips across the dashboard.</p>
+        </div>
+
+        <div class="docs-grid">
+          <article class="docs-card">
+            <div class="docs-card-num">01</div>
+            <div class="docs-card-body">
+              <div class="docs-section-kicker" style="margin-bottom:6px;">Curriculum Use</div>
+              <h4 class="docs-card-title">Lesson Component Facilitation</h4>
+              <p class="docs-card-desc">How effectively the teacher enacts each part of the lesson as designed, with attention to the purpose of each component. Focuses on whether transitions, directions, and facilitation moves ensure that students engage in the intended work of each phase (e.g., sense-making, practice, synthesis), rather than just moving smoothly through the lesson.</p>
+              <ul class="docs-bullets">
+                <li>Appears as a tooltip on: Overview radar &amp; bar charts, Teacher Stats radar, stat bars, accordion headers, character-card mini-bars.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-lcf" aria-hidden="true">
+                <span class="diag-lcf-step st1">1</span>
+                <span class="diag-lcf-arrow a1">›</span>
+                <span class="diag-lcf-step st2">2</span>
+                <span class="diag-lcf-arrow a2">›</span>
+                <span class="diag-lcf-step st3">3</span>
+                <span class="diag-lcf-arrow a3">›</span>
+                <span class="diag-lcf-step st4">4</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">02</div>
+            <div class="docs-card-body">
+              <div class="docs-section-kicker" style="margin-bottom:6px;">Curriculum Use</div>
+              <h4 class="docs-card-title">Pedagogical Elements</h4>
+              <p class="docs-card-desc">The degree to which the teacher uses content-appropriate instructional moves to support how students learn the material. Focuses on whether the teacher applies key pedagogical approaches (e.g., modeling, questioning, scaffolding, use of representations or texts) in ways that deepen understanding and align to the demands of the discipline, rather than relying on generic or procedural teaching strategies.</p>
+              <ul class="docs-bullets">
+                <li>Appears as a tooltip on: Overview radar &amp; bar charts, Teacher Stats radar, stat bars, accordion headers, character-card mini-bars.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-ped" aria-hidden="true">
+                <span class="diag-ped-tool t1">▲</span>
+                <span class="diag-ped-tool t2">●</span>
+                <span class="diag-ped-tool t3">■</span>
+                <span class="diag-ped-tool t4">◆</span>
+                <span class="diag-ped-ring"></span>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">03</div>
+            <div class="docs-card-body">
+              <div class="docs-section-kicker" style="margin-bottom:6px;">Student-Centered Instruction</div>
+              <h4 class="docs-card-title">Cognitive Lift</h4>
+              <p class="docs-card-desc">The level of thinking students are doing. Emphasizes whether students are doing the "heavy lifting" (reasoning, problem-solving, explaining) rather than the teacher doing most of the work.</p>
+              <ul class="docs-bullets">
+                <li>Appears as a tooltip on: Overview radar &amp; bar charts, Teacher Stats radar, stat bars, accordion headers, character-card mini-bars.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-lift" aria-hidden="true">
+                <span class="diag-lift-weight w1"></span>
+                <span class="diag-lift-bar"></span>
+                <span class="diag-lift-weight w2"></span>
+                <span class="diag-lift-spark s1">✦</span>
+                <span class="diag-lift-spark s2">✦</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">04</div>
+            <div class="docs-card-body">
+              <div class="docs-section-kicker" style="margin-bottom:6px;">Student-Centered Instruction</div>
+              <h4 class="docs-card-title">Discourse</h4>
+              <p class="docs-card-desc">The quality and structure of student talk. Focuses on how students engage in meaningful discussion, explain ideas, respond to others, and use academic language.</p>
+              <ul class="docs-bullets">
+                <li>Appears as a tooltip on: Overview radar &amp; bar charts, Teacher Stats radar, stat bars, accordion headers, character-card mini-bars.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-disc" aria-hidden="true">
+                <span class="diag-disc-bubble b1"></span>
+                <span class="diag-disc-bubble b2"></span>
+                <span class="diag-disc-bubble b3"></span>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">05</div>
+            <div class="docs-card-body">
+              <div class="docs-section-kicker" style="margin-bottom:6px;">Gathering and Using Evidence</div>
+              <h4 class="docs-card-title">Collecting Evidence</h4>
+              <p class="docs-card-desc">How the teacher gathers information about student understanding during the lesson. Includes curriculum-embedded assessment data, observation, and use of student work to monitor progress in real time.</p>
+              <ul class="docs-bullets">
+                <li>Appears as a tooltip on: Overview radar &amp; bar charts, Teacher Stats radar, stat bars, accordion headers, character-card mini-bars.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-collect" aria-hidden="true">
+                <div class="diag-collect-clip">
+                  <span class="diag-collect-check c1">✓</span>
+                  <span class="diag-collect-line ln1"></span>
+                  <span class="diag-collect-check c2">✓</span>
+                  <span class="diag-collect-line ln2"></span>
+                  <span class="diag-collect-check c3">✓</span>
+                  <span class="diag-collect-line ln3"></span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">06</div>
+            <div class="docs-card-body">
+              <div class="docs-section-kicker" style="margin-bottom:6px;">Gathering and Using Evidence</div>
+              <h4 class="docs-card-title">Responding and Feedback</h4>
+              <p class="docs-card-desc">How the teacher uses evidence of student thinking to adjust instruction and provide feedback. Looks at responsiveness, specificity of feedback, and whether it moves student learning forward.</p>
+              <ul class="docs-bullets">
+                <li>Appears as a tooltip on: Overview radar &amp; bar charts, Teacher Stats radar, stat bars, accordion headers, character-card mini-bars.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-feedback" aria-hidden="true">
+                <span class="diag-feedback-node nT">T</span>
+                <svg viewBox="0 0 120 70" class="diag-feedback-svg">
+                  <path d="M30 22 C 55 -6, 75 -6, 92 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M92 46 C 75 74, 55 74, 30 46" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-dasharray="3 3"/>
+                  <polygon points="92,18 100,22 92,26" fill="currentColor"/>
+                  <polygon points="30,42 22,46 30,50" fill="currentColor"/>
+                </svg>
+                <span class="diag-feedback-node nS">S</span>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">07</div>
+            <div class="docs-card-body">
+              <div class="docs-section-kicker" style="margin-bottom:6px;">Student Engagement</div>
+              <h4 class="docs-card-title">Collaborative Engagement</h4>
+              <p class="docs-card-desc">The extent to which students engage meaningfully with peers to build understanding. Focuses on whether collaboration involves shared thinking - such as explaining, questioning, and responding to ideas - rather than simply dividing work or participating superficially.</p>
+              <ul class="docs-bullets">
+                <li>Appears as a tooltip on: Overview radar &amp; bar charts, Teacher Stats radar, stat bars, accordion headers, character-card mini-bars.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-collab" aria-hidden="true">
+                <svg viewBox="0 0 120 80" class="diag-collab-svg">
+                  <line x1="30" y1="30" x2="60" y2="55" stroke="currentColor" stroke-width="1.5"/>
+                  <line x1="90" y1="30" x2="60" y2="55" stroke="currentColor" stroke-width="1.5"/>
+                  <line x1="30" y1="30" x2="90" y2="30" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2 3"/>
+                </svg>
+                <span class="diag-collab-peer p1"></span>
+                <span class="diag-collab-peer p2"></span>
+                <span class="diag-collab-peer p3"></span>
+              </div>
+            </div>
+          </article>
+
+          <article class="docs-card">
+            <div class="docs-card-num">08</div>
+            <div class="docs-card-body">
+              <div class="docs-section-kicker" style="margin-bottom:6px;">Student Engagement</div>
+              <h4 class="docs-card-title">Independent Engagement</h4>
+              <p class="docs-card-desc">The extent to which students are actively and productively engaged in individual work that advances their understanding. Focuses on whether students are thinking, applying, and making sense of content on their own, rather than passively completing tasks or waiting for direction.</p>
+              <ul class="docs-bullets">
+                <li>Appears as a tooltip on: Overview radar &amp; bar charts, Teacher Stats radar, stat bars, accordion headers, character-card mini-bars.</li>
+              </ul>
+            </div>
+            <div class="docs-card-diagram">
+              <div class="diag-indep" aria-hidden="true">
+                <span class="diag-indep-beam"></span>
+                <span class="diag-indep-figure">
+                  <span class="diag-indep-head"></span>
+                  <span class="diag-indep-body"></span>
+                </span>
+                <span class="diag-indep-spark sk1">✦</span>
+                <span class="diag-indep-spark sk2">✦</span>
+                <span class="diag-indep-spark sk3">✦</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      </div><!-- end features panel -->
+
+      <div class="docs-tab-panel" data-docs-panel="history" style="display:none;">
+        <div class="docs-history-head">
+          <div class="docs-section-kicker">Project history</div>
+          <h3 class="docs-section-title">Every commit on this branch tree</h3>
+          <p class="docs-section-sub">A chronological record of what shipped, organized by branch. Merges are highlighted; in-progress branches are labeled in color.</p>
+        </div>
+        <div class="docs-history" id="docs-history">Loading history…</div>
+      </div>
+
+      <div class="docs-footer">
+        <div class="docs-footer-line"></div>
+        <p>Need more help? Reach out to the AIMS team.</p>
+      </div>
+    </section>
+
+    <section class="section" id="panel-dashboard" style="display:none;">
+      <div class="dashboard-layout">
+        <aside class="dashboard-left">
+          <div class="dashboard-left-head">
+            <h2>Saved Graphs</h2>
+            <div class="muted" id="dashboard-count">0 saved</div>
+          </div>
+          <div class="dashboard-help">
+            Click a saved graph to view it. Use Ctrl/Cmd + click to compare multiple graphs side by side.
+          </div>
+          <div id="dashboard-list"></div>
+        </aside>
+
+        <div class="dashboard-right">
+          <div class="ai-summary" id="dashboard-ai-summary">
+            <div class="ai-head">
+              <div class="ai-title">AI Summary</div>
+              <button class="btn" id="btn-dashboard-ai">Generate summary</button>
+            </div>
+            <div class="ai-body" id="dashboard-ai-text">
+              Select one or more saved graphs, then generate an AI summary.
+            </div>
+            <div class="ai-note">For multiple graphs, AI compares patterns in academic-report style.</div>
+          </div>
+
+          <div class="insights" id="dashboard-insights"></div>
+
+          <div id="dashboard-view"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="dashboard-save-modal">
+    <div class="dashboard-modal-backdrop" data-close-dashboard-modal></div>
+    <div class="dashboard-modal-card" role="dialog" aria-modal="true" aria-labelledby="dashboard-modal-title">
+      <div class="dashboard-modal-head">
+        <h3 id="dashboard-modal-title">Save to Dashboard</h3>
+        <button class="btn" id="dashboard-modal-close" type="button">✕</button>
+      </div>
+      <label for="dashboard-name-input">Name (required)</label>
+      <input type="text" id="dashboard-name-input" maxlength="80" placeholder="e.g., Spring Benchmark - Grade 4 Focus">
+      <div class="dashboard-modal-actions">
+        <button class="btn" id="dashboard-modal-cancel" type="button">Cancel</button>
+        <button class="btn primary" id="dashboard-modal-save" type="button">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+
+
+  <script type="module" src="./visualizer.js"></script>
+</body>
+</html>

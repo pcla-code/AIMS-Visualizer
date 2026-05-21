@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>OpenAI Summary Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body{ font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 20px; max-width: 980px; }
+    h1{ font-size: 18px; margin: 0 0 10px; }
+    .row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+    input, textarea, button { font: inherit; }
+    .key{ width:min(720px, 100%); padding:10px; border:1px solid #ddd; border-radius:10px; }
+    textarea{ width:100%; min-height:180px; padding:12px; border:1px solid #ddd; border-radius:12px; line-height:1.35; }
+    button{ padding:10px 14px; border-radius:12px; border:1px solid #ccc; background:#111; color:#fff; cursor:pointer; }
+    button:disabled{ opacity:.6; cursor:not-allowed; }
+    .hint{ color:#666; font-size:13px; margin: 6px 0 14px; }
+    pre{
+      white-space: pre-wrap;
+      border:1px solid #e5e5ef;
+      background:#fafafe;
+      padding:12px;
+      border-radius:12px;
+      min-height: 120px;
+    }
+    .small{ font-size:12px; color:#777; }
+  </style>
+</head>
+<body>
+  <h1>OpenAI API — Insight Summary Test</h1>
+
+  <div class="hint">
+    Paste your insight lines below (one per line). Click <b>Summarize</b>. This calls OpenAI directly from the browser (key is exposed).
+  </div>
+
+  <div class="row">
+    <button id="btn">Summarize</button>
+    <button id="btn-example" style="background:#fff;color:#111;">Load example</button>
+    <span class="small" id="status"></span>
+  </div>
+
+  <textarea id="input" placeholder="Example:
+Largest drop: Grade 3 at Harada Elementary School (-6.6pp vs previous window)
+Most consistent: Jefferson Elementary School (lowest variance), 118 rows
+Top band shift: “not yet proficient” decreased most (-6.8pp)
+Top current average: Grade 4 at Lake Mathews Elementary School (81.1%)
+Largest gain: Grade 5 at Lake Mathews Elementary School (+2.2pp vs previous window)
+"></textarea>
+
+  <div class="hint small">
+    Output will be: 2 short paragraphs + 2 next checks (bullet list).
+  </div>
+
+  <pre id="out">—</pre>
+
+  <script type="module" src="./openai_test.js"></script>
+</body>
+</html>
