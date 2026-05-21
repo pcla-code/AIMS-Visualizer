@@ -1,5 +1,6 @@
 # AIMS Visualizer
 
+[![Version](https://badgen.net/badge/version/v1.2.1/blue)](#)
 [![Chart.js](https://badgen.net/badge/Chart.js/4.4.1/blue)](https://www.chartjs.org/)
 [![PapaParse](https://badgen.net/badge/PapaParse/5.4.1/green)](https://www.papaparse.com/)
 [![Firebase](https://badgen.net/badge/Firebase/12.0.0/orange)](https://firebase.google.com/)
@@ -13,6 +14,47 @@ A premium browser-based analysis workspace for two kinds of education data:
 - **GMW** — Great Minds Walkthrough classroom observations (8-dimension rubric across 4 categories).
 
 Load a CSV, filter by school / grade / curriculum / date, and watch every chart, insight card, and KPI recompute together. Save snapshots to a local dashboard, share an exact view through a short link, and generate AI-written summaries on demand.
+
+---
+
+## ⚠️ IMPORTANT — Setting up keys (read before first run)
+
+This repository ships with **all API keys redacted** as placeholders. The app will load, but the Quickshare and AI Summary features will not work until you fill them in.
+
+You must set the following values before deploying the tool:
+
+### 1. Firebase config — `visualizer.js` (top of file, ~line 6)
+
+```js
+const firebaseConfig = {
+  apiKey:     "REPLACE_WITH_YOUR_FIREBASE_API_KEY",
+  authDomain: "REPLACE_WITH_YOUR_FIREBASE_AUTH_DOMAIN",
+  projectId:  "REPLACE_WITH_YOUR_FIREBASE_PROJECT_ID",
+};
+```
+
+Create a Firebase project at <https://console.firebase.google.com/>, enable **Firestore** in production mode, and paste the project's web SDK config above. Then add security rules that allow reads/writes to the `quickshare/{code}` document path used by the app — anything stricter will break short-link generation.
+
+### 2. OpenAI API key — `visualizer.js` (~line 656) and `openai_test.js` (line 2)
+
+```js
+const OPENAI_API_KEY = "REPLACE_WITH_YOUR_OPENAI_API_KEY";
+```
+
+Get a key at <https://platform.openai.com/api-keys>. **Recommended**: leave this placeholder in the client and instead hardcode the key server-side inside [`openai_proxy.php`](openai_proxy.php) so the key never ships to the browser. To do that:
+
+1. In `openai_proxy.php`, replace the line `$apiKey = $body["apiKey"] ?? "";` with `$apiKey = getenv("OPENAI_API_KEY");` (and set `OPENAI_API_KEY` in the host's environment).
+2. In `visualizer.js` set `const OPENAI_API_KEY = "";` and remove `apiKey: OPENAI_API_KEY` from the three `fetch(OPENAI_PROXY_URL, ...)` payloads.
+
+**Never commit a real key to git.** If you do, [revoke it immediately](https://platform.openai.com/api-keys) and rotate.
+
+### 3. Proxy URL — `visualizer.js` (~line 652)
+
+```js
+const OPENAI_PROXY_URL = "/aims/openai_proxy.php";
+```
+
+Change this if you host the PHP proxy at a different path or on a different origin.
 
 ---
 
