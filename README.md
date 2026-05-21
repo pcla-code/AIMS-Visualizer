@@ -118,11 +118,16 @@ A character-select screen for teachers in the GMW dataset:
 - Multi-select via Messenger-style chips to overlay multiple teachers on the radar; a gold dashed line shows their averaged profile.
 - Every observation comment is filed into 8 collapsible **Coaching Notes** sections — one per rubric dimension — with observer, date, and the score that day.
 
+<img width="2546" height="1436" alt="dimensions" src="https://github.com/user-attachments/assets/6a316b75-eadb-494e-9f96-003a24e6ab97" />
+
+
 ---
 
 ## The rubric
 
 GMW captures classroom data across **eight dimensions** grouped into **four categories**. Hover any dimension label in the dashboard (radar axes, bar segments, mini-bars, stat-bar labels, accordion headers) to see the full definition in a tooltip.
+<img width="2210" height="645" alt="rubric" src="https://github.com/user-attachments/assets/8467961b-28dc-4a6b-8f63-a4f8807bcea7" />
+
 
 | Category | Dimensions |
 |---|---|
