@@ -6,7 +6,7 @@
 [![Firebase](https://badgen.net/badge/Firebase/12.0.0/orange)](https://firebase.google.com/)
 [![Node.js](https://badgen.net/badge/Node.js/18+/green)](https://nodejs.org/)
 [![PHP](https://badgen.net/badge/PHP/7.4+/purple)](https://www.php.net/)
-[![License](https://badgen.net/badge/license/private/grey)](#)
+[![License](https://badgen.net/badge/license/MIT/blue)](LICENSE)
 
 https://github.com/user-attachments/assets/9f27ed98-b93e-4181-b93a-76e4ce6c956e
 
@@ -37,20 +37,36 @@ const firebaseConfig = {
 
 Create a Firebase project at <https://console.firebase.google.com/>, enable **Firestore** in production mode, and paste the project's web SDK config above. Then add security rules that allow reads/writes to the `quickshare/{code}` document path used by the app — anything stricter will break short-link generation.
 
-### 2. OpenAI API key — `visualizer.js` (~line 656) and `openai_test.js` (line 2)
+**Why this key is safe in the browser.** The Firebase web SDK config behaves like a **public identifier** — think of it as a public half of a keypair. It tells the SDK *which* Firebase project to talk to, but it grants no access on its own. Every read or write still has to clear the **private security rules** you configure inside Firebase, which never leave Google's servers. Firebase is designed to expect this config in client-side JS; bundling it into the browser is the documented pattern. Access control belongs in Firestore security rules.
 
-```js
-const OPENAI_API_KEY = "REPLACE_WITH_YOUR_OPENAI_API_KEY";
-```
+### 2. OpenAI API key — server-side by default (recommended for production)
 
-Get a key at <https://platform.openai.com/api-keys>. **Recommended**: leave this placeholder in the client and instead hardcode the key server-side inside [`openai_proxy.php`](openai_proxy.php) so the key never ships to the browser. To do that:
+The OpenAI key lives **server-side** in PHP. The browser never sees it.
 
-1. In `openai_proxy.php`, replace the line `$apiKey = $body["apiKey"] ?? "";` with `$apiKey = getenv("OPENAI_API_KEY");` (and set `OPENAI_API_KEY` in the host's environment).
-2. In `visualizer.js` set `const OPENAI_API_KEY = "";` and remove `apiKey: OPENAI_API_KEY` from the three `fetch(OPENAI_PROXY_URL, ...)` payloads.
+1. Get a key at <https://platform.openai.com/api-keys>.
+2. Set `OPENAI_API_KEY` as an environment variable on the host running PHP:
+   - **Apache:** `SetEnv OPENAI_API_KEY sk-...` in your vhost or `.htaccess`.
+   - **nginx + php-fpm:** `fastcgi_param OPENAI_API_KEY sk-...;` in your `location ~ \.php$` block.
+   - **Shared hosting / cPanel / Plesk:** add the env var via the host's UI.
+3. Leave `DEV_ALLOW_CLIENT_KEY = false` in [`openai_proxy.php`](openai_proxy.php) (the default).
+4. Leave `const OPENAI_API_KEY = "";` blank in [`visualizer.js`](visualizer.js) (~line 651).
 
-**Never commit a real key to git.** If you do, [revoke it immediately](https://platform.openai.com/api-keys) and rotate.
+In this configuration the browser sends only the prompt text; PHP reads the key from its environment and calls OpenAI. If neither the environment variable nor the dev mode below is configured, the proxy returns `500 "Server-side OPENAI_API_KEY not configured"`.
 
-### 3. Proxy URL — `visualizer.js` (~line 652)
+#### Dev mode — local testing only
+
+If you can't easily set environment variables on your local machine, opt into the client-side pattern instead. **Do not deploy this configuration.**
+
+1. In [`openai_proxy.php`](openai_proxy.php) set `DEV_ALLOW_CLIENT_KEY = true`.
+2. In [`visualizer.js`](visualizer.js) paste a test key into `const OPENAI_API_KEY = "...";`.
+
+**Warnings:**
+- The key will be visible in the browser's devtools (Sources, Network), to anyone who views the page source, and to anyone who receives a quickshare link generated while the key was loaded.
+- Never commit a real key to git. If you do, [revoke it immediately](https://platform.openai.com/api-keys) and rotate.
+- Use a test key with a low spend cap.
+- Revert both flags before pushing the proxy to any non-local host.
+
+### 3. Proxy URL — `visualizer.js` (~line 648)
 
 ```js
 const OPENAI_PROXY_URL = "/aims/openai_proxy.php";
@@ -101,7 +117,7 @@ Copy a short link that encodes your exact view — filters, active tab, date win
 [![Firebase](https://badgen.net/badge/Firebase/12.0.0/orange)](https://firebase.google.com/) Firestore stores the short codes (e.g. `?qs=A7F2K9Q`) so the URL stays tiny.
 
 ### 4. AI Summary
-Turn the auto-detected insight cards into a concise narrative for memos and stakeholder briefs. Generated on demand via a thin PHP proxy at [`openai_proxy.php`](openai_proxy.php) — no local model needed. The summary text travels with quickshare links so the recipient reads the same writeup.
+Turn the auto-detected insight cards into a concise narrative for memos and stakeholder briefs. Generated on demand via a thin PHP proxy at [`openai_proxy.php`](openai_proxy.php) — no local model needed. The summary text travels with quickshare links so the recipient reads the same writeup. The OpenAI key lives server-side — see [Setting up keys](#️-important--setting-up-keys-read-before-first-run) above.
 
 ### 5. Oracle Mode (trend forecasting)
 <img width="2525" height="1222" alt="oracle" src="https://github.com/user-attachments/assets/3336e80d-5aa6-4f0a-a3dc-04977dbf10a6" />
@@ -142,20 +158,27 @@ The full definitions live in [`visualizer.js`](visualizer.js) on the `GMW_DIMENS
 
 ## Demo data
 
-The repo ships with **anonymized** EM2 and GMW data at [`data/`](data/) so the app works out of the box without any real names or institutions.
+The repo ships with **fully synthetic** EM2 and GMW demo data at [`data/`](data/). Every value — schools, districts, teacher and observer names, dates, IPs, lat/long, NCES IDs, rubric scores, **and the 80 free-text observation comments per GMW row** — is fabricated from static pools and templated phrases in [`scripts/generate-demo-csvs.js`](scripts/generate-demo-csvs.js). No real student, teacher, school, or comment data was used as input. Safe to share publicly.
 
-To regenerate the demo CSVs from a real source (e.g., after the source CSV is updated):
+To regenerate the demo CSVs:
+
+```bash
+node scripts/generate-demo-csvs.js
+```
+
+[![Node.js](https://badgen.net/badge/Node.js/18+/green)](https://nodejs.org/) Dependency-free — no `npm install` needed. The script preserves the existing column schema in [`data/EM2.csv`](data/EM2.csv) and [`data/GMW.csv`](data/GMW.csv) (including the Qualtrics meta rows in GMW) and overwrites every data row. A fixed PRNG seed makes the output deterministic across runs. Schools are assigned tiered baselines plus per-school trend arcs (improving / declining / flat / sawtooth) so insight cards and Oracle Mode have real signal to find. Each teacher gets one of ten distinct rubric archetypes — Achiever, Discourse Champion, Curriculum-Faithful, Spiky, Emerging, Struggling, and more — so the radar charts, Power Level rankings, and Coaching Notes show visually striking differences across the roster.
+
+### Anonymizing your own real data (separate workflow)
+
+If you have real EM2/GMW source files you want to load locally — e.g., to test the app against your own district's data — [`scripts/anonymize-csvs.js`](scripts/anonymize-csvs.js) is a separate tool that builds deterministic identifier mappings and runs a name-scrub pass over comment cells:
 
 ```bash
 node scripts/anonymize-csvs.js [path-to-source-dir]
 ```
 
-[![Node.js](https://badgen.net/badge/Node.js/18+/green)](https://nodejs.org/) The script ([`scripts/anonymize-csvs.js`](scripts/anonymize-csvs.js)) is dependency-free — no `npm install` needed. It builds deterministic mappings per identifier domain (teachers, observers, schools, districts, NCES IDs, IPs, emails, lat/long) and scrubs first/last name mentions inside observation comment text. Rubric scores, dates, grades, modules, percentages, and performance bands are untouched. Re-running against the same source produces byte-identical output.
+This anonymizes `IPAddress`, `ResponseId`, recipient/observer/teacher names, emails, districts, public/private school names, NCES IDs, lat/long, and runs a regex scrub over the 80 `o{N}_{i}_comments` cells.
 
-**What gets anonymized:**
-
-- GMW: `IPAddress`, `ResponseId`, `RecipientFirstName/LastName/Email`, `demo_name`, `demo_email`, `resp_email`, `demo_district_1`, `demo_school_pub_1`, `demo_school_priv_1`, `demo_school_OLD`, `o{1..10}_tchr_name`, `LocationLatitude/Longitude`, `ExternalReference`, `NCES_District`, `NCES_School`, `NCES_School_Private`, and the 80 `o{N}_{i}_comments` cells.
-- EM2: `school` (mapped through the same school pool as GMW so cross-dataset names stay aligned).
+> **Caveat — comments.** The anonymizer's comment scrub only replaces *name tokens it knows about*. Free-text comments can still contain student names, classroom anecdotes, or context the scrub won't catch. Anonymized real comments are **not** safe to publish or commit. The shipped demo data in [`data/`](data/) deliberately does not use this script's output — it uses fully synthetic comments instead.
 
 ---
 
@@ -168,10 +191,11 @@ node scripts/anonymize-csvs.js [path-to-source-dir]
 ├── visualizer.css              # Design system + every CSS animation in the docs-card diagrams
 ├── openai_proxy.php            # Minimal POST proxy that forwards prompts to the OpenAI API
 ├── data/
-│   ├── EM2.csv                 # Anonymized EM2 demo (assessment performance)
-│   └── GMW.csv                 # Anonymized GMW demo (Great Minds Walkthrough observations)
+│   ├── EM2.csv                 # Fully synthetic EM2 demo (assessment performance)
+│   └── GMW.csv                 # Fully synthetic GMW demo (Great Minds Walkthrough observations)
 ├── scripts/
-│   └── anonymize-csvs.js       # Deterministic anonymizer (Node.js, no deps)
+│   ├── generate-demo-csvs.js   # Synthetic demo-data generator (Node.js, no deps)
+│   └── anonymize-csvs.js       # Optional anonymizer for local use against real data
 ├── openai_test.html            # Standalone smoke test for the OpenAI proxy
 └── openai_test.js
 ```
@@ -181,8 +205,8 @@ node scripts/anonymize-csvs.js [path-to-source-dir]
 ## Browser & runtime support
 
 - **Browsers**: any modern evergreen browser (Chrome, Edge, Firefox, Safari). Uses ES modules and CSS custom properties.
-- **AI Summary**: requires the PHP proxy to be reachable. [![PHP](https://badgen.net/badge/PHP/7.4+/purple)](https://www.php.net/) — set `OPENAI_API_KEY` in the proxy host's environment, lock the endpoint down for production.
-- **Anonymizer**: [![Node.js](https://badgen.net/badge/Node.js/18+/green)](https://nodejs.org/) tested on 18+. No `package.json` required.
+- **AI Summary**: requires the PHP proxy to be reachable. [![PHP](https://badgen.net/badge/PHP/7.4+/purple)](https://www.php.net/) — see [Setting up keys](#️-important--setting-up-keys-read-before-first-run) for the server-side / dev-mode options.
+- **Demo-data generator / anonymizer**: [![Node.js](https://badgen.net/badge/Node.js/18+/green)](https://nodejs.org/) tested on 18+. No `package.json` required.
 
 ---
 
@@ -196,4 +220,4 @@ node scripts/anonymize-csvs.js [path-to-source-dir]
 
 ## License
 
-Private project — all rights reserved by the AIMS team.
+Released under the [MIT License](LICENSE). © 2026
