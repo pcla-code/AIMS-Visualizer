@@ -1,7 +1,7 @@
-// IMPORTANT: replace this placeholder with your own OpenAI API key before
-// running the smoke test. See README.md -> "Setting up keys".
-// Never commit a real key back to the repo - rotate it immediately if you do.
-const OPENAI_API_KEY = "REPLACE_WITH_YOUR_OPENAI_API_KEY";
+// Leave blank for the safe default (server-side OPENAI_API_KEY env var on the PHP host).
+// For local dev only: paste a key here AND set DEV_ALLOW_CLIENT_KEY = true in openai_proxy.php.
+// Never commit a real key. See README.md "API key & the OpenAI proxy".
+const OPENAI_API_KEY = "";
 
 // If your project uses a proxy / different base URL later, change this.
 const OPENAI_URL = "/aims/openai_proxy.php";
@@ -152,11 +152,11 @@ async function summarize(){
 
 function loadExample(){
   $("#input").value = [
-    "Largest drop: Grade 3 at Harada Elementary School (-6.6pp vs previous window)",
-    "Most consistent: Jefferson Elementary School (lowest variance), 118 rows",
+    "Largest drop: Grade 3 at Sequoia Elementary School (-6.6pp vs previous window)",
+    "Most consistent: Riverbend Elementary School (lowest variance), 118 rows",
     "Top band shift: “not yet proficient” decreased most (-6.8pp)",
-    "Top current average: Grade 4 at Lake Mathews Elementary School (81.1%)",
-    "Largest gain: Grade 5 at Lake Mathews Elementary School (+2.2pp vs previous window)"
+    "Top current average: Grade 4 at Aspen Grove Elementary School (81.1%)",
+    "Largest gain: Grade 5 at Aspen Grove Elementary School (+2.2pp vs previous window)"
   ].join("\n");
 }
 

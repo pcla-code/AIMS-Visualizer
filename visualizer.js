@@ -3,14 +3,10 @@ import {
   getFirestore, doc, setDoc, getDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
-// IMPORTANT: replace these placeholders with your own Firebase project config
-// before deploying. See README.md -> "Setting up keys" for instructions.
-// Firebase web API keys are not secret per se, but they identify your project
-// to Firestore (used by the Quickshare short-link feature).
 const firebaseConfig = {
-  apiKey: "REPLACE_WITH_YOUR_FIREBASE_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_FIREBASE_AUTH_DOMAIN",
-  projectId: "REPLACE_WITH_YOUR_FIREBASE_PROJECT_ID",
+  apiKey: "AIzaSyAeZxGWAvrrMbV-u-iTxFlQeJOmoMCLBF8",
+  authDomain: "qrfdb-63bde.firebaseapp.com",
+  projectId: "qrfdb-63bde",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -651,12 +647,10 @@ function renderInsights(){
 // jn.020226 - AI Summary via OpenAI proxy (server-side; no CORS; no local models)
 const OPENAI_PROXY_URL = "/aims/openai_proxy.php";
 
-// IMPORTANT: replace this placeholder with your own OpenAI API key, OR hardcode
-// the key server-side in openai_proxy.php and set this to "" (recommended).
-// See README.md -> "Setting up keys" for instructions.
-// If your proxy expects apiKey from client, keep this.
-// If you hardcoded the key server-side, set this to "" and remove from payload below.
-const OPENAI_API_KEY = "REPLACE_WITH_YOUR_OPENAI_API_KEY"; // optional
+// Leave blank for the safe default (server-side OPENAI_API_KEY env var on the PHP host).
+// For local dev only: paste a key here AND set DEV_ALLOW_CLIENT_KEY = true in openai_proxy.php.
+// Never commit a real key. See README.md "API key & the OpenAI proxy".
+const OPENAI_API_KEY = "";
 
 let __AI = { lastKey: null, busy: false };
 
