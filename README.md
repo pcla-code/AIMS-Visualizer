@@ -107,7 +107,7 @@ Charts: [![Chart.js](https://badgen.net/badge/Chart.js/4.4.1/blue)](https://www.
 CSV parsing: [![PapaParse](https://badgen.net/badge/PapaParse/5.4.1/green)](https://www.papaparse.com/) handles the upload pipeline including quoted fields with embedded newlines.
 
 ### 2. Save to Dashboard
-<img width="2525" height="1030" alt="dashboard" src="https://github.com/user-attachments/assets/2f9b91b4-ea87-4ca4-951e-ac4b0d8f9b57" />
+<img width="2522" height="1217" alt="image" src="https://github.com/user-attachments/assets/118da3f3-2fa8-459c-9411-6f4e34eaba51" />
 
 Snapshot the current charts into the **Dashboard** panel and give it a name (e.g. *"Spring Benchmark: Grade 4 Focus"*). Snapshots are kept in `localStorage`, so they're private and instant. The Dashboard tab opens any snapshot, or `Ctrl`/`⌘`-click multiple to view side by side.
 
