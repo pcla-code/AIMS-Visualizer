@@ -8,7 +8,7 @@
 [![PHP](https://badgen.net/badge/PHP/7.4+/purple)](https://www.php.net/)
 [![License](https://badgen.net/badge/license/MIT/blue)](LICENSE)
 
-https://github.com/user-attachments/assets/9f27ed98-b93e-4181-b93a-76e4ce6c956e
+https://github.com/user-attachments/assets/fd5693fa-2c3b-4813-814c-e92660e34aa6
 
 A premium browser-based analysis workspace for two kinds of education data:
 
