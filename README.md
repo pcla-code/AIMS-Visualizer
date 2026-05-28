@@ -8,7 +8,7 @@
 [![PHP](https://badgen.net/badge/PHP/7.4+/purple)](https://www.php.net/)
 [![License](https://badgen.net/badge/license/MIT/blue)](LICENSE)
 
-https://github.com/user-attachments/assets/fd5693fa-2c3b-4813-814c-e92660e34aa6
+https://github.com/user-attachments/assets/485c2caf-ee0f-4d34-9b45-a9421aafff60
 
 A premium browser-based analysis workspace for two kinds of education data:
 
@@ -93,7 +93,8 @@ The bundled demo CSVs at [`data/EM2.csv`](data/EM2.csv) and [`data/GMW.csv`](dat
 ## What it does
 
 ### 1. Overview tab: the analysis workspace
-<img width="2535" height="1227" alt="overview" src="https://github.com/user-attachments/assets/38124056-785b-4834-8ebf-4918e4f2fd86" />
+<img width="2523" height="1223" alt="overview" src="https://github.com/user-attachments/assets/0a32c7bd-58de-4b11-ab76-9eae002ca5d5" />
+
 
 Drop in an **EM2** or **GMW** CSV. Format detection is automatic. Qualtrics meta-rows are stripped, GMW wide-format sheets are reshaped row-by-row into long format. Then filter:
 
@@ -107,7 +108,8 @@ Charts: [![Chart.js](https://badgen.net/badge/Chart.js/4.4.1/blue)](https://www.
 CSV parsing: [![PapaParse](https://badgen.net/badge/PapaParse/5.4.1/green)](https://www.papaparse.com/) handles the upload pipeline including quoted fields with embedded newlines.
 
 ### 2. Save to Dashboard
-<img width="2522" height="1217" alt="image" src="https://github.com/user-attachments/assets/118da3f3-2fa8-459c-9411-6f4e34eaba51" />
+<img width="2525" height="1226" alt="dashbaord" src="https://github.com/user-attachments/assets/209ba7ce-ab54-416e-b9b4-03141ea372c5" />
+
 
 Snapshot the current charts into the **Dashboard** panel and give it a name (e.g. *"Spring Benchmark: Grade 4 Focus"*). Snapshots are kept in `localStorage`, so they're private and instant. The Dashboard tab opens any snapshot, or `Ctrl`/`⌘`-click multiple to view side by side.
 
@@ -120,12 +122,14 @@ Copy a short link that encodes your exact view: filters, active tab, date window
 Turn the auto-detected insight cards into a concise narrative for memos and stakeholder briefs. Generated on demand via a thin PHP proxy at [`openai_proxy.php`](openai_proxy.php). No local model needed. The summary text travels with quickshare links so the recipient reads the same writeup. The OpenAI key lives server-side. See [Setting up keys](#️-important-setting-up-keys-read-before-first-run) above.
 
 ### 5. Oracle Mode (trend forecasting)
-<img width="2525" height="1222" alt="oracle" src="https://github.com/user-attachments/assets/3336e80d-5aa6-4f0a-a3dc-04977dbf10a6" />
+<img width="2527" height="1227" alt="oracle" src="https://github.com/user-attachments/assets/a2983c5f-d257-476c-a07f-351c947e37f2" />
+
 
 Project where each school × grade is heading by fitting a regression slope per bucket. Insight cards call out the **steepest rise**, **sharpest drop**, and **most stable** entity. Re-rank live whenever filters change.
 
 ### 6. Teacher Stats: game-style profiles
-<img width="2522" height="1222" alt="teacher stats" src="https://github.com/user-attachments/assets/b6ef7c63-aace-4a88-9749-fa1f30f1cbc1" />
+<img width="2525" height="1222" alt="teacher stats" src="https://github.com/user-attachments/assets/de07301a-9dff-449f-8101-a2bdf287a9b7" />
+
 
 A character-select screen for teachers in the GMW dataset:
 
